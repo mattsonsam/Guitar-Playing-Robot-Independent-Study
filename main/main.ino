@@ -10,7 +10,7 @@
 AccelStepper strumming(1, 54, 55); //using x-step pins
 AccelStepper fretting(1, 60, 61); //using y-step pins
 Servo muting;
-Servo majorminor;
+Servo majorminor; //hijack majorminor servo to do test for new subsystems
 
 int frethome = 3; //pin for limit switch for fretter
 int strumhome = 18; //pin for limit switch for strummer

@@ -12,8 +12,8 @@
 Servo myservo;  // create servo object to control a servo
 // twelve servo objects can be created on most boards
 
-int pos = 117;    // variable to store the servo position
-int strum_angle=8;
+int pos = 85;    // variable to store the servo position
+int strum_angle=15;
 int deg_per_sec=300; //degrees per secong of MG995 servo
 
 void setup() {
@@ -24,9 +24,9 @@ void loop() {
   /*myservo.write(pos);
   delay(200);*/
   myservo.write(pos+strum_angle);
-  delay(250);
+  delay(1000);
   /*myservo.write(pos);
   delay(200);*/
   myservo.write(pos-strum_angle);
-  delay(250);
+  delay(1000);
 }

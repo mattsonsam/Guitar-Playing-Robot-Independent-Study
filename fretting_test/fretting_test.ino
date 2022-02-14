@@ -13,14 +13,14 @@ Servo myservo;  // create servo object to control a servo
 // twelve servo objects can be created on most boards
 
 double pos = 0;    //initial servo position
-double fret_distance=10; //mm
+double fret_distance=5; //mm
 double dp=15; //diametral pitch of pinion gear in mm
 double fret_angle=(fret_distance*2/dp)*57;
 double fret_time=60; //time in ms to complete fretting move 
 
 
 void setup() {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(11);  // attaches the servo on pin 9 to the servo object
 }
 
 void loop() {
