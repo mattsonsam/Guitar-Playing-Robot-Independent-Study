@@ -11,6 +11,8 @@
 AccelStepper fretting(1, 60, 61); //using y-step pins
 Servo strum;
 Servo fret; //hijack fret servo to do test for new subsystems
+Servo fret2;
+Servo fret3;
 
 int frethome = 3; //pin for limit switch for fretter
 int strumhome = 18; //pin for limit switch for strummer
@@ -40,18 +42,21 @@ double fret_mmPerStep = fret_mm_per_rev / fret_step_per_rev; //linear distance t
 int fretHomingSpeed = -200;
 
 
-double fret_up = 0;    //initial servo position
-double fret_distance=5; //mm
+double fret_up = 30;    //initial servo position
+double fret_distance=10; //mm
 double dp=15; //diametral pitch of pinion gear in mm
 double fret_angle=(fret_distance*2/dp)*57;
 double fret_down=(fret_up+fret_angle);
 double fret_time=60; //time in ms to complete fretting move 
 
 double strum_mute_right=83;
-double strum_mute_left=86;
+double strum_mute_left=89;
 double strum_angle=15;
 double strum_right=strum_mute_right+strum_angle;
 double strum_left=strum_mute_right-strum_angle;
+
+double fret_delay=100;
+double strum_delay=250;
 
 
 
@@ -67,18 +72,18 @@ double strum_left=strum_mute_right-strum_angle;
 
 //-----------------------------------Declare fretting chord positions, and timing relevent to hard coding songs-----------------------------------------
 
-int E = 4; int EPos = 0; //all other positions are based off E to accomodate for any moves in the limit switch
+int E = 53; int EPos = 0; //all other positions are based off E to accomodate for any moves in the limit switch
 //no E sharp
-int F = 35 + E; int FPos = 1;
-int Fs = 65 + E; int FsPos = 2; //the "s" in Fs stands for "sharp"
+int F = 36 + E; int FPos = 1;
+int Fs = 67 + E; int FsPos = 2; //the "s" in Fs stands for "sharp"
 int G = 97 + E; int GPos = 3;
-int Gs = 128 + E; int GsPos = 4;
-int A = 155 + E; int APos = 5;
-int As = 181 + E; int AsPos = 6;
-int B = 215 + E; int BPos = 7;
+int Gs = 124 + E; int GsPos = 4;
+int A = 148 + E; int APos = 5;
+int As = 172 + E; int AsPos = 6;
+int B = 191 + E; int BPos = 7;
 //no B sharp
-int C = 240 + E; int CPos = 8;
-int Cs = 255 + E; int CsPos = 9;
+int C = 212 + E; int CPos = 8;
+int Cs = 235 + E; int CsPos = 9;
 int D = 275 + E; int DPos = 10;
 int Ds = 295 + E; int DsPos = 11;
 
@@ -101,6 +106,8 @@ void setup() {
   lcd.print("Starting...");
 
   fret.attach(11);  //attaches fret servo to pin 11
+  fret2.attach(32);
+  fret3.attach(47);
   strum.attach(4); 
   fretting.setMaxSpeed(1000000.0); //set arbitrarily high max speed, in units of [pulses/sec] (max reliable is about 4000 according to accelstepper).Prevents speed from being limited by code, we will not use this
   delay(1000);
@@ -118,23 +125,45 @@ void setup() {
 //-------------------------------------START VOID LOOP------------------------------------------------------------
 
 void loop() { //here is where we will call all our functions
-  strum.write(strum_mute_left);
-for (int i=0; i<12; i++){
-  gotochord(chordMatrix[i], true, 1);
-  if(i%2==0){
-    strum.write(strum_right);
-    delay(500);
-    strum.write(strum_mute_right);
-    delay(500);
-  }
-  if(i%2 != 0){
-    strum.write(strum_left);
-    delay(500);
-    strum.write(strum_mute_left);
-    delay(500);
-  }
-}
+  strum.write(strum_mute_right);
+for (int i=0; i<10; i++){
+  gotochord(chordMatrix[i], false, .5);
+  fret.write(fret_down-15);
+delay(fret_delay);
+//-------
+strum.write(strum_right);
+delay(strum_delay);
+strum.write(strum_mute_right);
+delay(strum_delay);
+//-------
+fret.write(fret_up-10);
+fret2.write(fret_down+10);
+delay(fret_delay);
+//------
+strum.write(strum_left);
+delay(strum_delay);
+strum.write(strum_mute_left);
+delay(strum_delay);
+//-------
+fret2.write(fret_up);
+fret3.write(fret_down+10);
+delay(fret_delay);
+//-------
+strum.write(strum_right);
+delay(strum_delay);
+strum.write(strum_mute_right);
+delay(strum_delay);
+strum.write(strum_left);
+delay(strum_delay);
+strum.write(strum_mute_left);
+delay(strum_delay);
+//-------
+//-------
+fret3.write(fret_up);
+
   
+}
+
 
 }
 
@@ -153,8 +182,10 @@ for (int i=0; i<12; i++){
 
 //---go home----
 void goHome(long strokeLengthmm, long mmPerStep, AccelStepper stepper, int limitSwitch, int homingSpeed) {
-  fret.write(fret_up);
-  strum.write(strum_left);
+  fret.write(fret_up-20);
+  fret2.write(fret_up);
+  fret3.write(fret_up);
+  strum.write(strum_mute_left);
   delay(500);
   long strokelength = ceil(strokeLengthmm / mmPerStep); //calculates number of steps to traverse entire rail
   stepper.moveTo(strokelength);
@@ -172,7 +203,9 @@ void goHome(long strokeLengthmm, long mmPerStep, AccelStepper stepper, int limit
 
 
 void gotochord(int chordAsNum, bool major, double t) { //posInSongMatrixStrings will be the counter in a for loop
-  fret.write(fret_up);
+  fret.write(fret_up-10);
+  fret2.write(fret_up+10);
+  fret3.write(fret_up+10);
   bool is_major = major;
   //bool major = fretBoolean(arrayposition, major_minor_array);
   long targetsteps = floor(chordAsNum / fret_mmPerStep);
