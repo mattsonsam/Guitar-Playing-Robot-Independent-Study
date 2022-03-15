@@ -42,33 +42,49 @@ V1 Video introduction to PCA9685 to control 16 Servo  https://youtu.be/y8X9X10Tn
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-// called this way, it uses the default address 0x40
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-// you can also call it with a different address you want
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
+//-----------------setting up servo driver stuff---------------------
 
-// Depending on your servo make, the pulse width min and max may vary, you 
-// want these to be as small/large as possible without hitting the hard stop
-// for max range. You'll have to tweak them as necessary to match the servos you
-// have!
-#define SERVOMIN  110 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
+// called this way, it uses the default address 0x40
+Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(); //First servo driver
+
+Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x41); //second servo driver
+
+
+#define SERVOMIN_FRET  110 
+#define SERVOMAX_FRET  575 
+#define SERVOMIN_STRUM  110 
+#define SERVOMAX_STRUM  575 //setting limits of different servo travels to the corresponding PWM pulse length for the servo driver, so that I can just tell the servo what angle to go to.
 
 // our servo # counter
 uint8_t servonum = 0;
 
+//--------------------define variables with regards to fretting and strumming mechanisms-----------------------
+
+int E1 = 0; //in regards to the fretting mechanism, refers to the servo responsible for the fret on the E string (fattest) that is closest to the head of the guitar
+int E2 = 1; //the integer denoting which pin on the servo driver will increase past 15 (each has pins from 0-15 for 16 servos total). In code, when feeding these as an argument, I will need to have a check for if the value of the servos pin is less than or greater than 15
+int E3 = 2; //if less than 15, use the object "pwm1" to tell the arduino that it is on the first servo driver, if above 15, first subtract 16 from its value (to set it to between 0 and 15), then use the object "pwm2" to tell the arduino to use the second servo driver
+int E4 = 3;
+
+int A1 = 4;
+int A2 = 5;
+int A3 = 6;
+int A4 = 7;
+
+int D1 = 8;
+
 void setup() {
   Serial.begin(9600);
-  Serial.println("16 channel Servo test!");
-
-  pwm.begin();
   
-  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm1.begin();
+  pwm2.begin();
+  
+  pwm1.setPWMFreq(60);  
+  pwm2.setPWMFreq(60);
 
   //yield();
 }
 
-// the code inside loop() has been updated by Robojax
+
 void loop() {
 
 
@@ -98,9 +114,11 @@ void loop() {
  * also prints the value on seial monitor
  * written by Ahmad Nejrabi for Robojax, Robojax.com
  */
-int angleToPulse(int ang){
-   int pulse = map(ang,0, 180, SERVOMIN,SERVOMAX);// map angle of 0 to 180 to Servo min and Servo max 
-   Serial.print("Angle: ");Serial.print(ang);
-   Serial.print(" pulse: ");Serial.println(pulse);
+int angleToPulseFret(int ang){
+   int pulse = map(ang,0, 180, SERVOMIN_FRET,SERVOMAX_FRET);// map angle of 0 to 180 to Servo min and Servo max 
+   return pulse;
+}
+int angleToPulseStrum(int ang){
+   int pulse = map(ang,0, 180, SERVOMIN_STRUM,SERVOMAX_STRUM);// map angle of 0 to 180 to Servo min and Servo max 
    return pulse;
 }
