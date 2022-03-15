@@ -49,14 +49,14 @@ double fret_angle=(fret_distance*2/dp)*57;
 double fret_down=(fret_up+fret_angle);
 double fret_time=60; //time in ms to complete fretting move 
 
-double strum_mute_right=83;
-double strum_mute_left=89;
-double strum_angle=15;
+double strum_mute_right=125;
+double strum_mute_left=124;
+double strum_angle=25;
 double strum_right=strum_mute_right+strum_angle;
 double strum_left=strum_mute_right-strum_angle;
 
-double fret_delay=100;
-double strum_delay=250;
+double fret_delay=50;
+double strum_delay=50;
 
 
 

@@ -20,13 +20,12 @@ double fret_time=60; //time in ms to complete fretting move
 
 
 void setup() {
-  myservo.attach(11);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
 }
 
 void loop() {
-  myservo.write(pos);
+  myservo.write(180);
   delay(500);
-  myservo.write(pos+fret_angle);
-  delay(500);
+  
   
 }
