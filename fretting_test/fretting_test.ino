@@ -59,18 +59,26 @@ Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x41); //second servo dri
 uint8_t servonum = 0;
 
 //--------------------define variables with regards to fretting and strumming mechanisms-----------------------
+    //-----fretting servos--------
+                                                                // the first row represents the pin number of the servo in relation to the two servo drivers 
+int E[3][4] = {{0,1,2,3},{170,170,160,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
+int A[3][4] = {{4,5,6,7},{180,140,160,160},{100,100,100,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
+int D[3][4] = {{8,9,10,11},{170,170,170,170},{100,100,100,100}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
+int G[3][4] = {{12,13,14,15},{0,10,10,20},{70,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
+int B[3][4] = {{16,17,18,19},{0,10,20,10},{70,70,70,70}}; 
+int e[3][4] = {{20,21,22,23},{10,10,0,0},{70,70,70,70}}; 
 
-int E1 = 0; //in regards to the fretting mechanism, refers to the servo responsible for the fret on the E string (fattest) that is closest to the head of the guitar
-int E2 = 1; //the integer denoting which pin on the servo driver will increase past 15 (each has pins from 0-15 for 16 servos total). In code, when feeding these as an argument, I will need to have a check for if the value of the servos pin is less than or greater than 15
-int E3 = 2; //if less than 15, use the object "pwm1" to tell the arduino that it is on the first servo driver, if above 15, first subtract 16 from its value (to set it to between 0 and 15), then use the object "pwm2" to tell the arduino to use the second servo driver
-int E4 = 3;
+    //------strumming servos will be exclusively on the second servo driver--------
 
-int A1 = 4;
-int A2 = 5;
-int A3 = 6;
-int A4 = 7;
+int Strum_E = 24-16; //defined in this way so that its clear that these are going to be plugged in to the second servo driver
+int Strum_A = 25-16;
+int Strum_D = 26-16;
+int Strum_G = 27-16;
+int Strum_B = 28-16;
+int Strum_e = 29-16; 
 
-int D1 = 8;
+
+
 
 void setup() {
   Serial.begin(9600);
@@ -86,34 +94,13 @@ void setup() {
 
 
 void loop() {
+pentatonicscale(500);
 
-
-  pwm.setPWM(0, 0, angleToPulse(180) );
-  pwm.setPWM(1, 0, angleToPulse(180) );
-  pwm.setPWM(2, 0, angleToPulse(180) );
-  pwm.setPWM(3, 0, angleToPulse(180) );
-  pwm.setPWM(4, 0, angleToPulse(180) );
-  pwm.setPWM(5, 0, angleToPulse(180) );
-
-  delay(500);
-
-  pwm.setPWM(0, 0, angleToPulse(0) );
-  pwm.setPWM(1, 0, angleToPulse(0) );
-  pwm.setPWM(2, 0, angleToPulse(0) );
-  pwm.setPWM(3, 0, angleToPulse(0) );
-  pwm.setPWM(4, 0, angleToPulse(0) );
-  pwm.setPWM(5, 0, angleToPulse(0) );
-  delay(500);
 
  
 }
 
-/*
- * angleToPulse(int ang)
- * gets angle in degree and returns the pulse width
- * also prints the value on seial monitor
- * written by Ahmad Nejrabi for Robojax, Robojax.com
- */
+//-----------map desired angle to pwm value to give to servos---------
 int angleToPulseFret(int ang){
    int pulse = map(ang,0, 180, SERVOMIN_FRET,SERVOMAX_FRET);// map angle of 0 to 180 to Servo min and Servo max 
    return pulse;
@@ -121,4 +108,64 @@ int angleToPulseFret(int ang){
 int angleToPulseStrum(int ang){
    int pulse = map(ang,0, 180, SERVOMIN_STRUM,SERVOMAX_STRUM);// map angle of 0 to 180 to Servo min and Servo max 
    return pulse;
+}
+
+//---------basic functions to move servos----------------
+void movefrettingservo(int servo, int ang){
+  if(servo<=15){
+    pwm1.setPWM(servo, 0, angleToPulseFret(ang));
+  }
+  if(servo>15){
+    pwm2.setPWM(servo-16, 0, angleToPulseFret(ang));
+  }
+}
+
+void movestrummingservo(int servo, int ang){
+  pwm2.setPWM(servo, 0, angleToPulseStrum(ang));
+}
+
+void fretup(int servo[3][4], int i){
+  movefrettingservo(servo[0][i], servo[1][i]);
+}
+void fretdown(int servo[3][4], int i){
+  movefrettingservo(servo[0][i], servo[2][i]);
+}
+void pentatonicscale(int d){
+ fretdown(E,0);
+ delay(d);
+ fretup(E,0);
+ fretdown(E,3);
+ delay(d);
+ fretup(E,3);
+ fretdown(A,0);
+ delay(d);
+ fretup(A,0);
+ fretdown(A,2);
+ delay(d);
+ fretup(A,2);
+ fretdown(D,0);
+ delay(d);
+ fretup(D,0);
+ fretdown(D,2);
+ delay(d);
+ fretup(D,2);
+ fretdown(G,0);
+ delay(d);
+ fretup(G,0);
+ fretdown(G,2);
+ delay(d);
+ fretup(G,2);
+ fretdown(B,0);
+ delay(d);
+ fretup(B,0);
+ fretdown(B,3);
+ delay(d);
+ fretup(B,3);
+ fretdown(e,0);
+ delay(d);
+ fretup(e,0);
+ fretdown(e,3);
+ delay(d);
+ fretup(e,3);
+
 }
