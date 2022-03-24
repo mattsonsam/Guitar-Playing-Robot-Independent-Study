@@ -95,6 +95,11 @@ void setup() {
 
 void loop() {
 pentatonicscale(500);
+movestrummingservo(Strum_E, 50);
+delay(500);
+movestrummingservo(Strum_E, 40);
+delay(500);
+
 
 
  
