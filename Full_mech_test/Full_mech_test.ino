@@ -4,6 +4,7 @@
 #include <LiquidCrystal.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <EEPROM.h>
 
 //---------------define servo angle min and maxes-----------------
 #define SERVOMIN_FRET  110 
@@ -21,21 +22,27 @@ uint8_t servonum = 0;
 //--------------------define variables with regards to fretting and strumming mechanisms-----------------------
     //-----fretting servos--------
                                                                 // the first row represents the pin number of the servo in relation to the two servo drivers 
-int E[3][4] = {{0,1,2,3},{170,170,160,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
-int A[3][4] = {{4,5,6,7},{180,140,160,160},{100,100,100,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
-int D[3][4] = {{8,9,10,11},{170,170,170,170},{100,100,100,100}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
-int G[3][4] = {{12,13,14,15},{0,10,10,20},{70,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
-int B[3][4] = {{16,17,18,19},{0,10,20,10},{70,70,70,70}}; 
-int e[3][4] = {{20,21,22,23},{10,10,0,0},{70,70,70,70}}; 
+int String_E[3][4] = {{0,1,2,3},{168,170,160,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
+int String_A[3][4] = {{4,5,6,7},{180,140,160,160},{100,100,100,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
+int String_D[3][4] = {{8,9,10,11},{170,170,170,170},{100,100,100,100}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
+int String_G[3][4] = {{12,13,14,15},{0,10,10,20},{0,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
+int String_B[3][4] = {{16,17,18,19},{0,10,20,10},{70,70,70,70}}; 
+int String_e[3][4] = {{20,21,22,23},{10,10,0,0},{70,70,70,70}}; 
 
     //------strumming servos will be exclusively on the second servo driver--------
 
-int Strum_E = 24-16; //defined in this way so that its clear that these are going to be plugged in to the second servo driver
-int Strum_A = 25-16;
-int Strum_D = 26-16;
-int Strum_G = 27-16;
-int Strum_B = 28-16;
-int Strum_e = 29-16; 
+int Strum_E[6] = {8,120,101,90,100}; int Strum_E_Pos=90;// declared as: Strummer= {pin number, strum right position, mute right position, strum left position, mute left position, current position}
+int Strum_A[6] = {9,90,90,90,90};   int Strum_A_Pos=90;
+int Strum_D[6] = {10,90,90,90,90};  int Strum_D_Pos=90;
+int Strum_G[6] = {11,90,90,90,90};  int Strum_G_Pos=90;
+int Strum_B[6] = {12,90,90,90,90};  int Strum_B_Pos=90;
+int Strum_e[6] = {13,90,90,90,90}; int Strum_e_Pos=90;
+
+int strum_right=1; //useful variables for addressing the arrays defined above ^ in functions for strumming
+int mute_right=2;
+int strum_left=3;
+int mute_left=4;
+int current_pos=5;
 
     //----------------stepper motor parameters
 long fret_strokelengthmm = 400; //the length of the entire fretting linear rail
@@ -46,29 +53,21 @@ int fretHomingSpeed = -200;
 int frethome = 3; //pin for limit switch for fretter
 
 
-    //-------strumming servos positions *****subject to change************-----------
-double strum_mute_right=125;
-double strum_mute_left=124;
-double strum_angle=25;
-double strum_right=strum_mute_right+strum_angle;
-double strum_left=strum_mute_right-strum_angle;
 
 //-----------------------------------Declare fretting chord positions, and timing relevent to hard coding songs-----------------------------------------
 
-int E = 53; int EPos = 0; //all other positions are based off E to accomodate for any moves in the limit switch
-int F = 36 + E; int FPos = 1;
-int Fs = 67 + E; int FsPos = 2; //the "s" in Fs stands for "sharp"
-int G = 97 + E; int GPos = 3;
-int Gs = 124 + E; int GsPos = 4;
-int A = 148 + E; int APos = 5;
-int As = 172 + E; int AsPos = 6;
-int B = 191 + E; int BPos = 7;
-int C = 212 + E; int CPos = 8;
-int Cs = 235 + E; int CsPos = 9;
-int D = 275 + E; int DPos = 10;
-int Ds = 295 + E; int DsPos = 11;
+int f1 = 37; int EPos = 0; //all other positions are based off E to accomodate for any moves in the limit switch
+int f2 = 32 + f1; int FPos = 1;
+int f3 = 62 + f1; int FsPos = 2; //the "s" in Fs stands for "sharp"
+int f4 = 90 + f1; int GPos = 3;
+int f5 = 115 +f1; int GsPos = 4;
+int f6 = 140 +f1; int APos = 5;
+int f7 = 163 +f1; int AsPos = 6;
+int f8 = 185 + f1; int BPos = 7;
+int f9 = 208 + f1; int CPos = 8;
 
-int chordMatrix[] = {E, F, Fs, G, Gs, A, As, B, C, Cs, D, Ds}; //matrix of all chords, chord position in matrix corresponds to pos variable
+
+int fretmatrix[] = {f1,f2,f3,f4,f5,f6,f7,f8,f9}; //matrix of all chords, chord position in matrix corresponds to pos variable
 
 void setup(){
   Serial.begin(9600);
@@ -80,10 +79,14 @@ void setup(){
   fretting.setMaxSpeed(1000000.0); //set arbitrarily high max speed, in units of [pulses/sec] (max reliable is about 4000 according to accelstepper).Prevents speed from being limited by code, we will not use this
   delay(1000);
 
-  goHome(fret_strokelengthmm, fret_mmPerStep, fretting, fretHomingSpeed);
+  //goHome(fret_strokelengthmm, fret_mmPerStep, fretting, fretHomingSpeed);
 }
 
 void loop(){
+ strum_E();
+ delay(500);
+ mute_E();
+ delay(500);
   
 }
 
@@ -93,7 +96,7 @@ void loop(){
 void goHome(long strokeLengthmm, long mmPerStep, AccelStepper stepper, int homingSpeed) {
   long strokelength = ceil(strokeLengthmm / mmPerStep); //calculates number of steps to traverse entire rail
   stepper.moveTo(strokelength);
-
+  allfretsup;
   while (digitalRead(frethome) == 0) {
     stepper.setSpeed(homingSpeed);
     stepper.run();
@@ -110,6 +113,7 @@ void gotochord(int chordAsNum, double t) { //posInSongMatrixStrings will be the 
   fretting.setSpeed(v_max);
   fretting.setAcceleration(accel);
   fretting.moveTo(targetsteps);
+  allfretsup;
   while (fretting.currentPosition() != fretting.targetPosition()) { //while not at the target position, execute steps
     fretting.run();
   }
@@ -136,8 +140,8 @@ void movefrettingservo(int servo, int ang){
   }
 }
 
-void movestrummingservo(int servo, int ang){
-  pwm2.setPWM(servo, 0, angleToPulseStrum(ang));
+void movestrummingservo(int servo[6], int ang){
+  pwm2.setPWM(servo[0], 0, angleToPulseStrum(ang));
 }
 
 void fretup(int servo[3][4], int i){
@@ -146,42 +150,84 @@ void fretup(int servo[3][4], int i){
 void fretdown(int servo[3][4], int i){
   movefrettingservo(servo[0][i], servo[2][i]);
 }
-void pentatonicscale(int d){
- fretdown(E,0);
- delay(d);
- fretup(E,0);
- fretdown(E,3);
- delay(d);
- fretup(E,3);
- fretdown(A,0);
- delay(d);
- fretup(A,0);
- fretdown(A,2);
- delay(d);
- fretup(A,2);
- fretdown(D,0);
- delay(d);
- fretup(D,0);
- fretdown(D,2);
- delay(d);
- fretup(D,2);
- fretdown(G,0);
- delay(d);
- fretup(G,0);
- fretdown(G,2);
- delay(d);
- fretup(G,2);
- fretdown(B,0);
- delay(d);
- fretup(B,0);
- fretdown(B,3);
- delay(d);
- fretup(B,3);
- fretdown(e,0);
- delay(d);
- fretup(e,0);
- fretdown(e,3);
- delay(d);
- fretup(e,3);
 
+void allfretsup(){
+  for (int i=0; i<=3; i++){
+    fretup(String_E,i);
+    fretup(String_A,i);
+    fretup(String_D,i);
+    fretup(String_G,i);
+    fretup(String_B,i);
+    fretup(String_e,i);
+    delay(500);
+    
+  }
+  fretup(String_e,0);
+  delay(500);
+  for (int i=0; i<16; i++){
+    pwm1.setPWM(i, 0, 4096);
+    pwm2.setPWM(i, 0, 4096);
+  }
+}
+void pentatonicscale(int d){
+ fretdown(String_E,0);
+ delay(d);
+ fretup(String_E,0);
+ fretdown(String_E,3);
+ delay(d);
+ fretup(String_E,3);
+ fretdown(String_A,0);
+ delay(d);
+ fretup(String_A,0);
+ fretdown(String_A,2);
+ delay(d);
+ fretup(String_A,2);
+ fretdown(String_D,0);
+ delay(d);
+ fretup(String_D,0);
+ fretdown(String_D,2);
+ delay(d);
+ fretup(String_D,2);
+ fretdown(String_G,0);
+ delay(d);
+ fretup(String_G,0);
+ fretdown(String_G,2);
+ delay(d);
+ fretup(String_G,2);
+ fretdown(String_B,0);
+ delay(d);
+ fretup(String_B,0);
+ fretdown(String_B,3);
+ delay(d);
+ fretup(String_B,3);
+ fretdown(String_e,0);
+ delay(d);
+ fretup(String_e,0);
+ fretdown(String_e,3);
+ delay(d);
+ fretup(String_e,3);
+
+}
+
+//------------------------strumming function---------------
+void strum_E(){
+  if(Strum_E_Pos>Strum_E[mute_left]){
+    movestrummingservo(Strum_E, Strum_E[strum_left]);
+    Strum_E_Pos=Strum_E[strum_left];
+  }
+  if(Strum_E_Pos<Strum_E[mute_right]){
+    movestrummingservo(Strum_E, Strum_E[strum_right]);
+    Strum_E_Pos=Strum_E[strum_right];
+  }
+}
+
+void mute_E(){
+  if(Strum_E_Pos>Strum_E[mute_right]){
+    movestrummingservo(Strum_E, Strum_E[mute_right]);
+    Strum_E_Pos=Strum_E[mute_right];
+  }
+  if(Strum_E_Pos<Strum_E[mute_left]){
+    movestrummingservo(Strum_E, Strum_E[mute_left]);
+    Strum_E_Pos=Strum_E[mute_left];
+  }
 }
