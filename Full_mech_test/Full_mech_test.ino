@@ -24,11 +24,11 @@ uint8_t servonum = 0;
 
     
     //the first one on D is just fucked and needs to be replaced, the first one on G seems to work when used with another arduino board, have to test with different pins on the actual servo drivers?                                                            // the first row represents the pin number of the servo in relation to the two servo drivers 
-int String_E[3][4] = {{0,1,2,3},{168,170,180,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
+int String_E[3][4] = {{0,1,2,3},{168,180,180,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
 int String_A[3][4] = {{4,5,6,7},{180,175,180,160},{100,100,100,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
 int String_D[3][4] = {{8,9,10,11},{170,170,165,170},{100,100,100,100}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
 int String_G[3][4] = {{12,13,14,15},{0,10,10,20},{100,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
-int String_B[3][4] = {{16,17,18,19},{5,10,20,10},{70,70,70,70}}; 
+int String_B[3][4] = {{16,17,18,19},{5,10,20,10},{70,70,80,70}}; 
 int String_e[3][4] = {{20,21,22,23},{10,10,0,0},{80,80,80,80}}; 
 
     //------strumming servos will be exclusively on the second servo driver--------
@@ -40,9 +40,9 @@ int current_pos=5;
 
 int Strum_E[6] = {8,120,103,90,102,103}; int Strum_E_Pos=Strum_E[mute_right];// declared as: Strummer= {pin number, strum right position, mute right position, strum left position, mute left position, current position}
 int Strum_A[6] = {9,137,122,106,121,122};   int Strum_A_Pos=Strum_A[mute_right];
-int Strum_D[6] = {10,123,106,93,105,105};  int Strum_D_Pos=Strum_D[mute_right];
-int Strum_G[6] = {11,103,88,74,87,88};  int Strum_G_Pos=Strum_G[mute_right];
-int Strum_B[6] = {12,145,134,119,133,134};  int Strum_B_Pos=Strum_B[mute_right];
+int Strum_D[6] = {10,128,108,93,107,108};  int Strum_D_Pos=Strum_D[mute_right];
+int Strum_G[6] = {11,106,89,74,88,89};  int Strum_G_Pos=Strum_G[mute_right];
+int Strum_B[6] = {12,145,135,119,134,135};  int Strum_B_Pos=Strum_B[mute_right];
 int Strum_e[6] = {13,90,75,62,74,75}; int Strum_e_Pos=Strum_e[mute_right];
 
 
@@ -73,8 +73,8 @@ int f9 = 208 + f1; int CPos = 8;
 int fretmatrix[] = {f1,f2,f3,f4,f5,f6,f7,f8,f9}; //matrix of all chords, chord position in matrix corresponds to pos variable
 
 void setup(){
-  allfretsdown();
-  allfretsup();
+  
+  
   Serial.begin(9600);
   pinMode(frethome, INPUT_PULLUP); //sets two limit switches as inputs with internal resistors
   pwm1.begin();
@@ -83,7 +83,7 @@ void setup(){
   pwm2.setPWMFreq(60);
   fretting.setMaxSpeed(1000000.0); //set arbitrarily high max speed, in units of [pulses/sec] (max reliable is about 4000 according to accelstepper).Prevents speed from being limited by code, we will not use this
   delay(1000);
-
+  allfretsup();
   goHome(fret_strokelengthmm, fret_mmPerStep, fretting, fretHomingSpeed);
   
   movestrummingservo(Strum_E[0],Strum_E[strum_right]);
@@ -103,69 +103,11 @@ void setup(){
 }
 
 void loop(){
-  /*int delayval=100;
- strum(Strum_E);
- delay(delayval);
- strum(Strum_A);
- delay(delayval);
- strum(Strum_D);
- delay(delayval);
- strum(Strum_G);
- delay(delayval);
- strum(Strum_B);
- delay(delayval);
- strum(Strum_e);
- delay(delayval);
- strum(Strum_e);
- delay(delayval);
- strum(Strum_B);
- delay(delayval);
- strum(Strum_G);
- delay(delayval);
- strum(Strum_D);
- delay(delayval);
- strum(Strum_A);
- delay(delayval);
- strum(Strum_E);
- delay(delayval);*/
- /*for (int i=0; i<4; i++){
-  movefrettingservo(String_E[0][i],0);
- }
- for (int i=0; i<4; i++){
-   movefrettingservo(String_A[0][i],0);
- }
- for (int i=0; i<4; i++){
-   movefrettingservo(String_D[0][i],0);
- }
- delay(1000);
- /*
- for (int i=0; i<4; i++){
-  fretdown(String_G,i);
-  delay(1000);
-  fretup(String_G,i);
-  delay(1000);
- }
- for (int i=0; i<4; i++){
-  fretdown(String_B,i);
-  delay(1000);
-  fretup(String_B,i);
-  delay(1000);
- }
- for (int i=0; i<4; i++){
-  fretdown(String_e,i);
-  delay(1000);
-  fretup(String_e,i);
-  delay(1000);
- }*/
- //gotochord(f1,1);
- //pentatonicscale(500);
- gotochord(f5, 1);
- pentatonicscale(200);
- //fretdown(String_G,0);
- //delay(1000);
- //fretup(String_G,0);
- //delay(1000);
- 
+ //everybodyhurts(1000);
+ back_in_black(80);
+  //strum(Strum_E);
+  //delay(1000);
+  
   
 }
 
@@ -235,21 +177,21 @@ void fretdown(int servo[3][4], int i){
 void allfretsup(){
   for (int i=0; i<=3; i++){
     fretup(String_E,i);
-    delay(500);
+    //delay(500);
     fretup(String_A,i);
-    delay(500);
+    //delay(500);
     fretup(String_D,i);
-    delay(500);
+    //delay(500);
     fretup(String_G,i);
-    delay(500);
+    //delay(500);
     fretup(String_B,i);
-    delay(500);
+    //delay(500);
     fretup(String_e,i);
-    delay(500);
+    //delay(500);
     
   }
-  fretup(String_e,0);
-  delay(500);
+  //fretup(String_e,0);
+  //delay(500);
   //for (int i=0; i<16; i++){
     //pwm1.setPWM(i, 0, 4096);
    // pwm2.setPWM(i, 0, 4096);
@@ -258,20 +200,80 @@ void allfretsup(){
 void allfretsdown(){
   for (int i=0; i<=3; i++){
     fretdown(String_E,i);
-    delay(500);
+    //delay(500);
     fretdown(String_A,i);
-    delay(500);
+    //delay(500);
     fretdown(String_D,i);
-    delay(500);
+    //delay(500);
     fretdown(String_G,i);
-    delay(500);
+    //delay(500);
     fretdown(String_B,i);
-    delay(500);
+    //delay(500);
     fretdown(String_e,i);
-    delay(500);
+    //delay(500);
     
   }
 }
+
+//------------------------strumming function---------------
+void strum(int servo[6]){
+  if(servo[current_pos]>servo[mute_left]){
+    movestrummingservo(servo[0],servo[strum_left]);
+    servo[current_pos]=servo[strum_left];
+    return;
+  }
+  if(servo[current_pos]<servo[mute_right]){
+    movestrummingservo(servo[0],servo[strum_right]);
+    servo[current_pos]=servo[strum_right];
+    return;
+  }
+}
+
+void mute(int servo[6]){
+  if(servo[current_pos]>servo[mute_right]){
+    movestrummingservo(servo[0],servo[mute_right]);
+    servo[current_pos]=servo[mute_right];
+    return;
+  }
+  if(servo[current_pos]<servo[mute_left]){
+    movestrummingservo(servo[0],servo[mute_left]);
+    servo[current_pos]=servo[mute_left];
+    return;
+  }
+}
+void muteall(){
+  mute(Strum_E);
+  mute(Strum_A);
+  mute(Strum_D);
+  mute(Strum_G);
+  mute(Strum_B);
+  mute(Strum_e);
+}
+
+void noteon(bool E, bool A, bool D, bool G, bool B, bool e, double duration){//for any string marked true, strums said string(s) and then mutes them after the given duration in milliseconds
+  if (E==true){
+    strum(Strum_E);
+  }
+  if (A==true){
+    strum(Strum_A);
+  }
+  if (D==true){
+    strum(Strum_D);
+  }
+  if (G==true){
+    strum(Strum_G);
+  }
+  if (B==true){
+    strum(Strum_B);
+  }
+  if(e==true){
+    strum(Strum_e);
+  }
+  delay(duration);
+  muteall();
+}
+
+//----------------song functions------------
 void pentatonicscale(int d){
  fretdown(String_E,0);
  delay(d);
@@ -348,29 +350,282 @@ void pentatonicscale(int d){
 
 }
 
-//------------------------strumming function---------------
-void strum(int servo[6]){
-  if(servo[current_pos]>servo[mute_left]){
-    movestrummingservo(servo[0],servo[strum_left]);
-    servo[current_pos]=servo[strum_left];
-    return;
-  }
-  if(servo[current_pos]<servo[mute_right]){
-    movestrummingservo(servo[0],servo[strum_right]);
-    servo[current_pos]=servo[strum_right];
-    return;
-  }
+void everybodyhurts_D(int d){
+  //-----form D+ chord---
+  
+  fretdown(String_G,1);
+  fretdown(String_B,2);
+  fretdown(String_e,1);
+  ///----strum sequence-----
+  strum(Strum_D);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_e);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+ 
+}
+void everybodyhurts_G(int d){
+  fretdown(String_e,2);
+  //--------strum sequence again-------
+  strum(Strum_D);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_e);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+ 
+  
 }
 
-void mute(int servo[6]){
-  if(servo[current_pos]>servo[mute_right]){
-    movestrummingservo(servo[0],servo[mute_right]);
-    servo[current_pos]=servo[mute_right];
-    return;
-  }
-  if(servo[current_pos]<servo[mute_left]){
-    movestrummingservo(servo[0],servo[mute_left]);
-    servo[current_pos]=servo[mute_left];
-    return;
-  }
+void everybodyhurts_Em(int d){
+  fretdown(String_D,1);
+  //--------strum sequence again-------
+  strum(Strum_D);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_e);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  
+  
 }
+ void everybodyhurts_A(int d){
+  fretdown(String_D,1);
+  fretdown(String_G,1);
+  fretdown(String_B,1);
+  //--------strum sequence again-------
+  strum(Strum_D);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_e);
+  delay(d);
+  strum(Strum_B);
+  delay(d);
+  strum(Strum_G);
+  delay(d);
+  
+ }
+
+ void everybodyhurts(int d){
+  gotochord(f1,1);
+
+  
+  everybodyhurts_D(d);
+  everybodyhurts_D(d);
+  allfretsup();
+  everybodyhurts_G(d);
+  everybodyhurts_G(d);
+  allfretsup();
+
+  
+  everybodyhurts_D(d);
+  everybodyhurts_D(d);
+  allfretsup();
+  everybodyhurts_G(d);
+  everybodyhurts_G(d);
+  allfretsup();
+
+  everybodyhurts_D(d);
+  everybodyhurts_D(d);
+  allfretsup();
+  everybodyhurts_G(d);
+  everybodyhurts_G(d);
+  allfretsup();
+
+  everybodyhurts_Em(d);
+  everybodyhurts_Em(d);
+  allfretsup();
+  everybodyhurts_A(d);
+  everybodyhurts_A(d);
+  allfretsup();
+
+  everybodyhurts_Em(d);
+  everybodyhurts_Em(d);
+  allfretsup();
+  everybodyhurts_A(d);
+  everybodyhurts_A(d);
+  allfretsup();
+
+  everybodyhurts_Em(d);
+  everybodyhurts_Em(d);
+  allfretsup();
+  everybodyhurts_A(d);
+  everybodyhurts_A(d);
+  everybodyhurts_A(d);
+  delay(d/4);
+  strum(Strum_D);
+  strum(Strum_G);
+  strum(Strum_B);
+  strum(Strum_e);
+  delay(3*d);
+  allfretsup();
+ }
+
+ void back_in_black(double tempo){
+  //tempo is in bpm
+  double quarter=(60/tempo)*1000; //duration of a quarter note in milliseconds
+  double eighth=quarter/2;
+  double sixteenth=eighth/2;
+
+  gotochord(f2,1);
+
+  fretdown(String_A,0);
+  fretdown(String_D,0);
+
+  noteon(1,1,1,0,0,0,eighth);
+
+  allfretsup();
+
+  fretdown(String_G,0);
+  fretdown(String_B,1);
+
+  delay(eighth*2);
+
+  noteon(0,0,1,1,1,0,sixteenth);
+  noteon(0,0,1,1,1,0,sixteenth);
+  noteon(0,0,1,1,1,0,sixteenth);
+
+  allfretsup();
+
+  fretdown(String_D,0);
+  fretdown(String_G,0);
+
+  delay(eighth*2);
+
+  noteon(0,1,1,1,0,0,sixteenth);
+  noteon(0,1,1,1,0,0,sixteenth);
+  noteon(0,1,1,1,0,0,sixteenth);
+
+  allfretsup();
+
+  fretdown(String_e,1);
+
+  delay(eighth+quarter+sixteenth);
+
+  noteon(0,0,0,0,0,1,sixteenth);
+
+  fretup(String_e,1);
+
+  noteon(0,0,0,0,0,1,sixteenth);
+
+  fretdown(String_B,1);
+
+  noteon(0,0,0,0,1,0,sixteenth);
+
+  fretup(String_B,1);
+
+  noteon(0,0,0,0,1,0,sixteenth);
+
+  fretdown(String_G,2);
+  fretdown(String_G,0);
+
+  noteon(0,0,0,1,0,0,sixteenth);
+
+  fretup(String_G,2);
+
+  noteon(0,0,0,1,0,0,sixteenth);
+
+  fretup(String_G,0);
+
+  noteon(0,0,0,1,0,0,sixteenth);
+
+  delay(sixteenth);
+
+  fretdown(String_A,0);
+  fretdown(String_D,0);
+
+  noteon(1,1,1,0,0,0,eighth);
+
+  allfretsup();
+
+  fretdown(String_G,0);
+  fretdown(String_B,1);
+
+  delay(eighth*2);
+
+  noteon(0,0,1,1,1,0,sixteenth);
+  noteon(0,0,1,1,1,0,sixteenth);
+  noteon(0,0,1,1,1,0,sixteenth);
+
+  allfretsup();
+
+  fretdown(String_D,0);
+  fretdown(String_G,0);
+
+  delay(eighth*2);
+
+  noteon(0,1,1,1,0,0,sixteenth);
+  noteon(0,1,1,1,0,0,sixteenth);
+  noteon(0,1,1,1,0,0,sixteenth);
+
+  allfretsup();
+
+  gotochord(f4,sixteenth/1000);
+
+  fretdown(String_E,3);
+
+  noteon(1,0,0,0,0,0,sixteenth);
+
+  fretup(String_E,3);
+  fretdown(String_E,0);
+
+  noteon(1,0,0,0,0,0,eighth);
+
+  fretup(String_E,0);
+  fretdown(String_E,3);
+
+  noteon(1,0,0,0,0,0,sixteenth);
+
+  fretup(String_E,3);
+  fretdown(String_E,1);
+
+  noteon(1,0,0,0,0,0,eighth);
+
+  fretup(String_E,1);
+  fretdown(String_E,3);
+
+  noteon(1,0,0,0,0,0,sixteenth);
+
+  fretup(String_E,3);
+  fretdown(String_E,2);
+
+  noteon(1,0,0,0,0,0,eighth);
+  
+  fretup(String_E,2);
+  fretdown(String_E,3);
+
+  noteon(1,0,0,0,0,0,sixteenth);
+
+  allfretsup(); 
+
+  strum(Strum_E);
+  
+  gotochord(f2,eighth/1000);
+
+  
+  
+ }
+ 
+ 
