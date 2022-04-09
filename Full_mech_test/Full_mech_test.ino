@@ -40,8 +40,8 @@ int current_pos=5;
 
 int Strum_E[6] = {8,120,103,90,102,103}; int Strum_E_Pos=Strum_E[mute_right];// declared as: Strummer= {pin number, strum right position, mute right position, strum left position, mute left position, current position}
 int Strum_A[6] = {9,137,122,106,121,122};   int Strum_A_Pos=Strum_A[mute_right];
-int Strum_D[6] = {10,128,108,93,107,108};  int Strum_D_Pos=Strum_D[mute_right];
-int Strum_G[6] = {11,106,89,74,88,89};  int Strum_G_Pos=Strum_G[mute_right];
+int Strum_D[6] = {10,128,108,90,107,108};  int Strum_D_Pos=Strum_D[mute_right];
+int Strum_G[6] = {11,110,89,70,88,89};  int Strum_G_Pos=Strum_G[mute_right];
 int Strum_B[6] = {12,145,135,119,134,135};  int Strum_B_Pos=Strum_B[mute_right];
 int Strum_e[6] = {13,90,75,62,74,75}; int Strum_e_Pos=Strum_e[mute_right];
 
@@ -103,8 +103,8 @@ void setup(){
 }
 
 void loop(){
- //everybodyhurts(1000);
- back_in_black(80);
+ everybodyhurts(50);
+ //back_in_black(80);
   //strum(Strum_E);
   //delay(1000);
   
