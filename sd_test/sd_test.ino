@@ -110,7 +110,7 @@ void loop(void)
         Serial.print("milliseconds per tick is: ");
         Serial.println(ms_per_tick);
         Serial.print("Number of tracks on file: ");
-        Serial.print(SMF.getTrackCount());
+        Serial.println(SMF.getTrackCount());
 
 
         //SMF.getNextEvent();  // ----- this is where I can also modify code
@@ -121,10 +121,11 @@ void loop(void)
 
     case STATE_GET_TRACK:
       Serial.println("Enter desired track number: ");
-      track_request = Serial.parseInt();
-      Serial.print("Parsing information from track ");
-      Serial.println(track_request);
+      while (Serial.available() == 0) {}          // wait for user input
+      track_request = Serial.parseInt();                    //Read user input and hold it in a variable
 
+ 
+ 
       state = STATE_PROCESS;
 
       break;
