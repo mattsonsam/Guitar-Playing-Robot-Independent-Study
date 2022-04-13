@@ -24,12 +24,12 @@ uint8_t servonum = 0;
 
     
     //the first one on D is just fucked and needs to be replaced, the first one on G seems to work when used with another arduino board, have to test with different pins on the actual servo drivers?                                                            // the first row represents the pin number of the servo in relation to the two servo drivers 
-int String_E[3][4] = {{0,1,2,3},{168,180,180,180},{100,100,100,100}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
-int String_A[3][4] = {{4,5,6,7},{180,175,180,160},{100,100,100,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
-int String_D[3][4] = {{8,9,10,11},{170,170,165,170},{100,100,100,100}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
-int String_G[3][4] = {{12,13,14,15},{0,10,10,20},{100,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
-int String_B[3][4] = {{16,17,18,19},{5,10,20,10},{70,70,80,70}}; 
-int String_e[3][4] = {{20,21,22,23},{10,10,0,0},{80,80,80,80}}; 
+int String_E[3][4] = {{0,1,2,3},{168,180,180,180},{90,130,120,120}};  //the second row in each array indicates the "up" position of each manipulator in terms of degrees
+int String_A[3][4] = {{4,5,6,7},{180,175,180,160},{110,120,120,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
+int String_D[3][4] = {{8,9,10,11},{170,170,165,170},{110,110,95,130}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
+int String_G[3][4] = {{12,13,14,15},{0,10,10,20},{70,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
+int String_B[3][4] = {{16,17,18,19},{5,10,40,10},{60,70,100,65}}; 
+int String_e[3][4] = {{20,21,22,23},{10,10,0,0},{83,70,45,70}}; 
 
     //------strumming servos will be exclusively on the second servo driver--------
 int strum_right=1; //useful variables for addressing the arrays defined above ^ in functions for strumming
@@ -39,11 +39,11 @@ int mute_left=4;
 int current_pos=5;
 
 int Strum_E[6] = {8,120,103,90,102,103}; int Strum_E_Pos=Strum_E[mute_right];// declared as: Strummer= {pin number, strum right position, mute right position, strum left position, mute left position, current position}
-int Strum_A[6] = {9,137,122,106,121,122};   int Strum_A_Pos=Strum_A[mute_right];
-int Strum_D[6] = {10,128,108,90,107,108};  int Strum_D_Pos=Strum_D[mute_right];
-int Strum_G[6] = {11,110,89,70,88,89};  int Strum_G_Pos=Strum_G[mute_right];
-int Strum_B[6] = {12,145,135,119,134,135};  int Strum_B_Pos=Strum_B[mute_right];
-int Strum_e[6] = {13,90,75,62,74,75}; int Strum_e_Pos=Strum_e[mute_right];
+int Strum_A[6] = {9,137,121,106,120,121};   int Strum_A_Pos=Strum_A[mute_right];
+int Strum_D[6] = {10,128,109,90,108,109};  int Strum_D_Pos=Strum_D[mute_right];
+int Strum_G[6] = {11,105,88,75,87,88};  int Strum_G_Pos=Strum_G[mute_right];
+int Strum_B[6] = {12,145,135,121,134,135};  int Strum_B_Pos=Strum_B[mute_right];
+int Strum_e[6] = {13,90,75,58,74,75}; int Strum_e_Pos=Strum_e[mute_right];
 
 
 
@@ -72,6 +72,9 @@ int f9 = 208 + f1; int CPos = 8;
 
 int fretmatrix[] = {f1,f2,f3,f4,f5,f6,f7,f8,f9}; //matrix of all chords, chord position in matrix corresponds to pos variable
 
+//--------------------------any functions that need optional arguements, their prototypes are declared here--------------
+//void multifretdown (int E=-1, int A=-1, int D=-1, int G=-1, int B=-1, int e=-1);
+
 void setup(){
   
   
@@ -85,7 +88,7 @@ void setup(){
   delay(1000);
   allfretsup();
   goHome(fret_strokelengthmm, fret_mmPerStep, fretting, fretHomingSpeed);
-  
+ 
   movestrummingservo(Strum_E[0],Strum_E[strum_right]);
   movestrummingservo(Strum_A[0],Strum_A[strum_right]);
   movestrummingservo(Strum_D[0],Strum_D[strum_right]);
@@ -103,10 +106,17 @@ void setup(){
 }
 
 void loop(){
- everybodyhurts(50);
+ //everybodyhurts(50);
  //back_in_black(80);
-  //strum(Strum_E);
-  //delay(1000);
+  herecomesthesun(125);
+  //gotochord(f9,5);
+ /* fretdown(String_e,3);
+  delay(1000);
+  strum(Strum_e);
+  delay(1000);
+  mute(Strum_e);
+  allfretsup();
+  delay(1000);*/
   
   
 }
@@ -215,6 +225,50 @@ void allfretsdown(){
   }
 }
 
+void multifretdown (int E, int A, int D, int G, int B, int e){ //an input of zero for any argument corrresponds to not moving the fretting servo
+  if (E>0){
+    fretdown(String_E,E-1);
+  }
+  if (A>0){
+    fretdown(String_A,A-1);
+  }
+  if (D>0){
+    fretdown(String_D,D-1);
+  }
+  if(G>0){
+    fretdown(String_G,G-1);
+  }
+  if (B>0){
+    fretdown(String_B,B-1);
+  }
+  if(e>0){
+    fretdown(String_e,e-1);
+  }
+  
+}
+
+void multifretup (int E, int A, int D, int G, int B, int e){ //an input of zero for any argument corrresponds to not moving the fretting servo
+  if (E>0){
+    fretup(String_E,E-1);
+  }
+  if (A>0){
+    fretup(String_A,A-1);
+  }
+  if (D>0){
+    fretup(String_D,D-1);
+  }
+  if(G>0){
+    fretup(String_G,G-1);
+  }
+  if (B>0){
+    fretup(String_B,B-1);
+  }
+  if(e>0){
+    fretup(String_e,e-1);
+  }
+  
+}
+
 //------------------------strumming function---------------
 void strum(int servo[6]){
   if(servo[current_pos]>servo[mute_left]){
@@ -271,6 +325,48 @@ void noteon(bool E, bool A, bool D, bool G, bool B, bool e, double duration){//f
   }
   delay(duration);
   muteall();
+}
+
+void strum_multiple(bool E, bool A, bool D, bool G, bool B, bool e){//for any string marked true, strums said string(s) and then mutes them after the given duration in milliseconds
+  if (E==true){
+    strum(Strum_E);
+  }
+  if (A==true){
+    strum(Strum_A);
+  }
+  if (D==true){
+    strum(Strum_D);
+  }
+  if (G==true){
+    strum(Strum_G);
+  }
+  if (B==true){
+    strum(Strum_B);
+  }
+  if(e==true){
+    strum(Strum_e);
+  }
+}
+
+void mute_multiple(bool E, bool A, bool D, bool G, bool B, bool e ){//for any string marked true, strums said string(s) and then mutes them after the given duration in milliseconds
+  if (E==true){
+    mute(Strum_E);
+  }
+  if (A==true){
+    mute(Strum_A);
+  }
+  if (D==true){
+    mute(Strum_D);
+  }
+  if (G==true){
+    mute(Strum_G);
+  }
+  if (B==true){
+    mute(Strum_B);
+  }
+  if(e==true){
+    mute(Strum_e);
+  }
 }
 
 //----------------song functions------------
@@ -625,6 +721,447 @@ void everybodyhurts_Em(int d){
   gotochord(f2,eighth/1000);
 
   
+  
+ }
+
+
+ void herecomesthesun (double tempo){
+  //tempo is in bpm
+  double quarter=(60/tempo)*1000; //duration of a quarter note in milliseconds
+  double eighth=quarter/2;
+  double sixteenth=eighth/2;
+  double half=quarter*2;
+
+  int fretdelay=50; //give frets some time to get to their positions
+
+  //------opening riff-----
+
+  gotochord(f7,3);
+
+  multifretdown(0,0,1,3,4,3);
+  delay(fretdelay);
+  strum_multiple(0,0,1,1,1,1);
+
+  delay(eighth);
+
+  strum_multiple(0,0,0,0,1,0);
+
+  delay(eighth);
+
+  fretup(String_e,2);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(eighth);
+
+  //fretup(String_e,0);
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  //fretup(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretdown(String_e,0);
+  fretup(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(4,3,1,1,1,0);
+  delay(fretdelay);
+  strum_multiple(1,1,1,1,1,0);
+//------------------------------------------------
+  delay(quarter);
+
+  fretdown(String_B,3);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(quarter);
+
+  fretup(String_B,3);
+  fretdown(String_B,0);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum_multiple(0,0,0,0,1,1);
+
+  delay(quarter);
+
+  fretdown(String_B,3);
+  fretup(String_B,0);
+  strum(Strum_B);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(0,1,3,1,1,0);
+  delay(fretdelay);
+  strum_multiple(0,1,1,1,1,0);
+
+  delay(eighth);
+
+  //fretup(String_B,0);
+  fretdown(String_B,2);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretdown(String_B,0);
+  fretup(String_B,2);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretdown(String_B,2);
+  //fretup(String_B,0);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretdown(String_B,3);
+  fretup(String_B,2);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(0,0,0,0,3,1);
+  delay(fretdelay);
+  strum_multiple(0,0,0,0,1,1);
+
+  //-------------------------------------------
+
+  delay(half*2);
+  
+  allfretsup();
+   multifretdown(0,0,1,3,4,3);
+  delay(fretdelay);
+  strum_multiple(0,0,1,1,1,1);
+
+  delay(eighth);
+
+  strum_multiple(0,0,0,0,1,0);
+
+  delay(eighth);
+
+  fretup(String_e,2);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(eighth);
+
+  //fretup(String_e,0);
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  //fretup(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretdown(String_e,0);
+  fretup(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(4,3,1,1,1,0);
+  delay(fretdelay);
+  strum_multiple(1,1,1,1,1,0);
+
+  //-------------
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretup(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretdown(String_B,3);
+  delay(fretdelay);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(1,1,3,1,3,1);
+  delay(fretdelay);
+
+  strum_multiple(0,1,1,1,1,0);
+
+  delay(half*4);
+
+  //-----------------------------------verse 1-----------
+
+  allfretsup();
+  multifretdown(1,1,1,3,4,3);
+  delay(fretdelay);
+  strum_multiple(0,0,1,1,1,0);
+
+  delay(quarter);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  fretup(String_e,2);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(half);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretup(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(eighth);
+
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(4,3,1,1,1,1);
+  delay(fretdelay);
+  strum_multiple(1,1,1,1,1,0);
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretup(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretdown(String_e,2);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  allfretsup();
+  multifretdown(1,3,1,2,4,1);
+  delay(fretdelay);
+  strum_multiple(1,1,1,1,1,0);
+
+  delay(half);
+
+  allfretsup();
+  multifretdown(1,1,1,3,4,3);
+  delay(fretdelay);
+  strum_multiple(0,0,1,1,1,0);
+
+  delay(quarter);
+
+  strum(Strum_e);
+
+  delay(quarter);
+
+  fretup(String_e,2);
+  fretdown(String_e,0);
+  delay(fretdelay);
+  strum(Strum_e);
+
+  delay(quarter);
+
+  strum(Strum_B);
+
+  delay(quarter);
+
+  //---------------dododododododododododododo-------------
+
+  allfretsup();
+  multifretdown(0,0,0,1,1,1);
+  fretdown(String_G,2);
+  delay(fretdelay);
+  strum(Strum_G);
+
+  delay(eighth);
+  
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretdown(String_B,3);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  fretdown(String_G,2);
+  delay(fretdelay);
+  strum(Strum_G);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  fretup(String_G,2);
+  delay(fretdelay);
+  strum(Strum_G);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  fretdown(String_G,2);
+  delay(fretdelay);
+  strum(Strum_G);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretdown(String_B,2);
+  fretup(String_B,3);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  fretup(String_B,2);
+  delay(fretdelay);
+  strum(Strum_B);
+
+  delay(eighth);
+
+  strum(Strum_G);
+
+  delay(quarter);
+
+ /* allfretsup();
+  multifretdown(0,0,1,3,4,3);
+  delay(fretdelay);
+  strum_multiple(0,0,1,1,1,0);
+
+  delay(quarter);
+
+  strum(Strum_e);
+
+  delay(eighth);
+
+  strum(Strum_B);
+
+  delay(eighth)*/
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  //delay(5000);
+
+  allfretsup();
+
+  
+  
+
   
  }
  
