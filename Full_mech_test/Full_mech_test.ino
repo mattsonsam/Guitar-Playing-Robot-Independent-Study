@@ -28,7 +28,7 @@ int String_E[3][4] = {{0,1,2,3},{168,180,180,180},{90,130,120,120}};  //the seco
 int String_A[3][4] = {{4,5,6,7},{180,175,180,160},{110,120,120,100}};  //the third row in each array indicates the "down" position of each manipulator in terms of degrees
 int String_D[3][4] = {{8,9,10,11},{170,170,165,170},{110,110,95,130}}; //this way, if each servo responds slightly differently to a pwm command sent to it, I can compensate for the specific servos by giving them
 int String_G[3][4] = {{12,13,14,15},{0,10,10,20},{70,70,70,70}};           // their own unique up and down positions. There are probably better ways to do this
-int String_B[3][4] = {{16,17,18,19},{5,10,40,10},{60,70,100,65}}; 
+int String_B[3][4] = {{16,17,18,19},{5,10,40,10},{60,70,95,65}}; 
 int String_e[3][4] = {{20,21,22,23},{10,10,0,0},{83,70,45,70}}; 
 
     //------strumming servos will be exclusively on the second servo driver--------
@@ -41,8 +41,8 @@ int current_pos=5;
 int Strum_E[6] = {8,120,103,90,102,103}; int Strum_E_Pos=Strum_E[mute_right];// declared as: Strummer= {pin number, strum right position, mute right position, strum left position, mute left position, current position}
 int Strum_A[6] = {9,137,121,106,120,121};   int Strum_A_Pos=Strum_A[mute_right];
 int Strum_D[6] = {10,128,109,90,108,109};  int Strum_D_Pos=Strum_D[mute_right];
-int Strum_G[6] = {11,105,88,75,87,88};  int Strum_G_Pos=Strum_G[mute_right];
-int Strum_B[6] = {12,145,135,121,134,135};  int Strum_B_Pos=Strum_B[mute_right];
+int Strum_G[6] = {11,105,88,70,87,88};  int Strum_G_Pos=Strum_G[mute_right];
+int Strum_B[6] = {12,147,135,121,134,135};  int Strum_B_Pos=Strum_B[mute_right];
 int Strum_e[6] = {13,90,75,58,74,75}; int Strum_e_Pos=Strum_e[mute_right];
 
 
@@ -106,17 +106,14 @@ void setup(){
 }
 
 void loop(){
- //everybodyhurts(50);
+ //everybodyhurts(350);
  //back_in_black(80);
-  herecomesthesun(125);
-  //gotochord(f9,5);
- /* fretdown(String_e,3);
-  delay(1000);
-  strum(Strum_e);
-  delay(1000);
-  mute(Strum_e);
-  allfretsup();
-  delay(1000);*/
+  herecomesthesun(300);
+  /*gotochord(f1,5);
+  fretdown(String_B,2);
+  strum(Strum_B);
+  delay(500);*/
+ 
   
   
 }
@@ -371,6 +368,7 @@ void mute_multiple(bool E, bool A, bool D, bool G, bool B, bool e ){//for any st
 
 //----------------song functions------------
 void pentatonicscale(int d){
+ gotochord(f5,1);
  fretdown(String_E,0);
  delay(d);
  strum(Strum_E);
